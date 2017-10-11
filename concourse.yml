@@ -1,0 +1,114 @@
+---
+name: concourse
+
+releases:
+- name: concourse
+  version: latest
+- name: garden-runc
+  version: latest
+
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: latest
+
+instance_groups:
+- name: web
+  instances: 1
+  # replace with a VM type from your BOSH Director's cloud config
+  vm_type: large
+  stemcell: trusty
+  azs: [z1]
+  networks:
+  - name: default
+    default: [dns, gateway]
+# vm extensions to be used in case the web vm for concourse is required to be behind an load balancer.
+  vm_extensions:
+  - concourse-elb
+  jobs:
+  - name: atc
+    release: concourse
+    properties:
+      # replace with your CI's externally reachable URL, e.g. https://ci.concourse.com
+      external_url: https://<domain_name> #CHANGE_ME
+      # replace the ecryption key with your own secret
+      # openssl enc -aes-128-cbc -k <my_secret> -P -md md5
+      encryption_key: 0AEAF28AE8A26685465187AA8993CF61  #CHANGE_ME
+
+      # Basic auth for main team;
+      # Not recommended; please replace with the admin team authentication method of your choice
+      basic_auth_username: admin
+      basic_auth_password: #CHANGE_ME
+
+      # CredHub Integration
+      credhub:
+        client_id: director_to_credhub #default client name; do not change
+        client_secret: giu8un14uowu82fzmc9z #(bosh int ./creds.yml --path /uaa_clients_director_to_credhub)
+        path_prefix: /concourse
+        tls:
+          insecure_skip_verify: false
+          # certificate derived from creds.yml file from BOSH Director deployment.
+          # use commandd for certificate: bosh int ./creds.yml --path /credhub_ca/ca
+          ca_cert: |
+            -----BEGIN CERTIFICATE-----
+            *************************
+            -----END CERTIFICATE-----
+        url: https://<BOSH_DIRECTOR_IP>:8844  #CHANGE_ME
+
+      postgresql_database: &atc_db atc
+  - name: tsa
+    release: concourse
+    properties: {}
+
+- name: db
+  instances: 1
+  # replace with a VM type from your BOSH Director's cloud config
+  vm_type: large
+  stemcell: trusty
+  # replace with a disk type from your BOSH Director's cloud config
+  persistent_disk_type: large
+  azs: [z1]
+  networks:
+  - name: default
+  jobs:
+  - name: postgresql
+    release: concourse
+    properties:
+      databases:
+      - name: *atc_db
+        # make up a role and password
+        role: admin
+        password: concoursedb
+
+- name: worker
+  instances: 1
+  # replace with a VM type from your BOSH Director's cloud config
+  vm_type: large
+  vm_extensions:
+  # replace with a VM extension from your BOSH Director's cloud config that will attach
+  # sufficient ephemeral storage to VMs in this instance group.
+  - concourse-disk
+  stemcell: trusty
+  azs: [z1]
+  networks:
+  - name: default
+  jobs:
+  - name: groundcrew
+    release: concourse
+    properties: {}
+  - name: baggageclaim
+    release: concourse
+    properties: {}
+  - name: garden
+    release: garden-runc
+    properties:
+      garden:
+        listen_network: tcp
+        listen_address: 0.0.0.0:7777
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  serial: false
+  canary_watch_time: 1000-60000
+  update_watch_time: 1000-60000

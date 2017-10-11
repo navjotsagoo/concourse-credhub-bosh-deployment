@@ -1,0 +1,22 @@
+jobs:
+- name: hello-world
+  plan:
+  - task: say-hello
+    config:
+      platform: linux
+
+      image_resource:
+        type: docker-image
+        source: {repository: ubuntu}
+
+      params:
+        paramkey: ((testkey))
+
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          whoami
+          env
+          echo $paramkey
