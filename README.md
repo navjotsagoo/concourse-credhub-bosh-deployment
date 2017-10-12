@@ -1,5 +1,11 @@
 #Deploying Concourse with Credhub Integration
 
+The BOSH Director installation is based off of the bosh-deployment repository. The BOSH team keeps this repository up to date with the latest bosh and credhub advances. In order to modify the installation we modify variables and add [BOSH operations files](https://bosh.io/docs/cli-ops-files.html). This installation also requires the use of the [BOSHv2 CLI](https://bosh.io/docs/cli-v2.html)
+
+```bash
+git clone https://github.com/cloudfoundry/bosh-deployment.git
+```
+
 Run the following command to create or update a BOSH Director
 Adding `uaa` and `credhub` yaml ops files during deployment of Bosh Director
 
