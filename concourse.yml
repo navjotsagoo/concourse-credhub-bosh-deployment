@@ -43,7 +43,7 @@ instance_groups:
       # CredHub Integration
       credhub:
         client_id: director_to_credhub #default client name; do not change
-        client_secret: giu8un14uowu82fzmc9z #(bosh int ./creds.yml --path /uaa_clients_director_to_credhub)
+        client_secret: CHANGE_ME #(bosh int ./creds.yml --path /uaa_clients_director_to_credhub)
         path_prefix: /concourse
         tls:
           insecure_skip_verify: false
@@ -55,30 +55,27 @@ instance_groups:
             -----END CERTIFICATE-----
         url: https://<BOSH_DIRECTOR_IP>:8844  #CHANGE_ME
 
+      # RDS Integration
+      postgresql:
+        ca_cert:
+          -----BEGIN CERTIFICATE-----
+            # download ca_cert for AWS GovCloud from
+            # http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html
+          -----END CERTIFICATE-----
+
+        database: atc
+        host: #CHANGE_ME
+        port: 5432
+        role:
+          name: atc #In RDS Config, set master username=atc & database name=atc
+          password: #CHANGE_ME #db master password (no special characters please)
+          # You can pick any database identifier name, such as concourse-atc
+
       postgresql_database: &atc_db atc
+
   - name: tsa
     release: concourse
     properties: {}
-
-- name: db
-  instances: 1
-  # replace with a VM type from your BOSH Director's cloud config
-  vm_type: large
-  stemcell: trusty
-  # replace with a disk type from your BOSH Director's cloud config
-  persistent_disk_type: large
-  azs: [z1]
-  networks:
-  - name: default
-  jobs:
-  - name: postgresql
-    release: concourse
-    properties:
-      databases:
-      - name: *atc_db
-        # make up a role and password
-        role: admin
-        password: concoursedb
 
 - name: worker
   instances: 1

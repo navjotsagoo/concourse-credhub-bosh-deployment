@@ -1,7 +1,8 @@
-#Deploying Concourse with Credhub Integration
+# Deploying Concourse with Credhub Integration
 
 Run the following command to create or update a BOSH Director
-Adding `uaa` and `credhub` yaml ops files during deployment of Bosh Director
+
+Add `uaa` and `credhub` yaml ops files during deployment of Bosh Director
 
 ```bash
 bosh create-env bosh-deployment/bosh.yml \
@@ -24,12 +25,12 @@ bosh create-env bosh-deployment/bosh.yml \
     -v subnet_id=CHANGE_ME
   ```
 
-#Download Credhub CLI
+# Download Credhub CLI
 https://github.com/cloudfoundry-incubator/credhub-cli/releases
 
 Verify connection to Credhub
 ```bash
-  credhub api \
+credhub api \
 --ca-cert=<(bosh int ./creds.yml --path /credhub_ca/ca) \
 --ca-cert=<(bosh int ./creds.yml --path /uaa_ssl/ca) \
 --server=<BOSH_DIRECTOR_IP>:8844
