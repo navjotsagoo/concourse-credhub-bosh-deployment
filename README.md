@@ -39,8 +39,8 @@ credhub api \
 Verify login to Credhub
 ```bash
 credhub login \
---client-name=director_credhub_client \
---client-secret=my_secret # get value of (bosh int ./creds.yml --path /uaa_clients_director_to_credhub)
+--client-name=director_to_credhub \
+--client-secret= # get value of (bosh int ./creds.yml --path /uaa_clients_director_to_credhub)
 This is the value that gets placed in concourse.yml file under credhub properties.
 ```
 
